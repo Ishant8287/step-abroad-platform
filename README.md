@@ -67,6 +67,18 @@ npm run seed
 npm run dev
 ```
 
+
+### Run Frontend
+
+```bash
+cd frontend
+npm install
+cp .env.example .env
+npm run dev
+```
+
+Frontend runs by default on `http://localhost:5173` and expects backend at `http://localhost:4000/api`.
+
 ### Environment Variables
 
 | Variable | Description | Default |
