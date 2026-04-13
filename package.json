@@ -1,8 +1,8 @@
 {
-  "name": "waygood-candidate-evaluation-starter",
+  "name": "study-abroad-platform",
   "private": true,
   "version": "1.0.0",
-  "description": "Study abroad candidate evaluation starter for Waygood backend-focused MERN internships.",
+  "description": "Backend API for university discovery and application management platform."
   "workspaces": [
     "backend",
     "frontend"
