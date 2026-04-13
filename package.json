@@ -2,7 +2,7 @@
   "name": "study-abroad-platform",
   "private": true,
   "version": "1.0.0",
-  "description": "Backend API for university discovery and application management platform."
+  "description": "Backend API for university discovery and application management platform.",
   "workspaces": [
     "backend",
     "frontend"
