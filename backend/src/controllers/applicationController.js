@@ -58,6 +58,10 @@ const createApplication = asyncHandler(async (req, res) => {
     throw new HttpError(400, "programId and intake are required.");
   }
 
+  if (!mongoose.isValidObjectId(programId)) {
+    throw new HttpError(400, "Invalid programId.");
+  }
+
   const program = await Program.findById(programId);
   if (!program) {
     throw new HttpError(404, "Program not found.");
@@ -126,6 +130,11 @@ const updateApplicationStatus = asyncHandler(async (req, res) => {
     application.student.toString() !== req.user._id.toString()
   ) {
     throw new HttpError(403, "You are not authorised to update this application.");
+  }
+
+  // Students can only advance the application to "submitted"
+  if (req.user.role === "student" && status !== "submitted") {
+    throw new HttpError(403, "Students can only submit applications.");
   }
 
   const allowedTransitions = validStatusTransitions[application.status];

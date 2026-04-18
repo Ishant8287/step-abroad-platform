@@ -5,6 +5,7 @@ const HttpError = require("../utils/httpError");
 const Student = require("../models/Student");
 const RefreshToken = require("../models/RefreshToken");
 const env = require("../config/env");
+const cacheService = require("../services/cacheService");
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -124,9 +125,14 @@ const login = asyncHandler(async (req, res) => {
 });
 
 const me = asyncHandler(async (req, res) => {
+  const user = req.user.toObject ? req.user.toObject() : req.user;
+  delete user.createdAt;
+  delete user.updatedAt;
+  delete user.__v;
+
   res.json({
     success: true,
-    data: req.user,
+    data: user,
   });
 });
 
@@ -239,6 +245,10 @@ const updateProfile = asyncHandler(async (req, res) => {
     user.profileComplete = true;
     await user.save();
   }
+
+  // Invalidate recommendation cache so fresh ones are fetched
+  await cacheService.delete(`recommendations-${req.user._id}-pinecone`);
+  await cacheService.delete(`recommendations-${req.user._id}-fallback`);
 
   res.json({
     success: true,

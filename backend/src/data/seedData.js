@@ -1,4 +1,4 @@
-﻿const universities = [
+const universities = [
   {
     name: "Heriot-Watt University Dubai",
     country: "UAE",
@@ -209,12 +209,15 @@ const students = [
     role: "counselor",
     targetCountries: [],
     interestedFields: [],
-    preferredIntake: "",
-    maxBudgetUsd: 0,
-    englishTest: {
-      exam: "IELTS",
-      score: 0,
-    },
+    profileComplete: true,
+  },
+  {
+    fullName: "System Admin",
+    email: "admin@example.com",
+    password: "AdminPassword123!",
+    role: "admin",
+    targetCountries: [],
+    interestedFields: [],
     profileComplete: true,
   },
 ];

@@ -23,7 +23,7 @@ const requireAuth = asyncHandler(async (req, res, next) => {
   }
 
   // Step 2: look up the user — this is a separate concern from token validity
-  const student = await Student.findById(decoded.sub).select("-password");
+  const student = await Student.findById(decoded.sub).select("-password -createdAt -updatedAt -__v");
   if (!student) {
     throw new HttpError(401, "Authenticated user no longer exists.");
   }

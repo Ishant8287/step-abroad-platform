@@ -10,6 +10,7 @@ const navItems = [
   { to: "/dashboard/programs", label: "Programs", icon: "📋" },
   { to: "/dashboard/applications", label: "Applications", icon: "📄" },
   { to: "/dashboard/recommendations", label: "Recommendations", icon: "💡" },
+  { to: "/dashboard/profile", label: "Profile", icon: "👤" },
 ];
 
 const pageLabels = {
@@ -59,8 +60,12 @@ export default function Layout() {
       <aside className={`sidebar ${sidebarOpen ? "sidebar-open" : ""}`}>
         <div className="sidebar-header">
           <div className="sidebar-logo">
-            <span className="sidebar-logo-icon">✦</span>
-            StudyVerse
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#2563eb" />
+              <path d="M2 17L12 22L22 17" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M2 12L12 17L22 12" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            StepAbroad
           </div>
         </div>
 

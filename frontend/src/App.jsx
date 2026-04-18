@@ -8,6 +8,7 @@ import LandingPage from "./pages/LandingPage";
 import ProgramsPage from "./pages/ProgramsPage";
 import RecommendationsPage from "./pages/RecommendationsPage";
 import UniversitiesPage from "./pages/UniversitiesPage";
+import ProfilePage from "./pages/ProfilePage";
 
 function ProtectedRoute({ children }) {
   return getToken() ? children : <Navigate to="/login" replace />;
@@ -35,6 +36,7 @@ export default function App() {
         <Route path="programs" element={<ProgramsPage />} />
         <Route path="applications" element={<ApplicationsPage />} />
         <Route path="recommendations" element={<RecommendationsPage />} />
+        <Route path="profile" element={<ProfilePage />} />
       </Route>
     </Routes>
   );

@@ -1,63 +1,198 @@
-import { useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
-import { gsap } from "gsap";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { api } from "../lib/api";
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
-  visible: (i = 0) => ({
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, delay: i * 0.1, ease: [0.25, 0.46, 0.45, 0.94] },
-  }),
-};
-
-function AnimatedNumber({ value }) {
-  const ref = useRef(null);
-  const hasAnimated = useRef(false);
-
-  useEffect(() => {
-    if (!ref.current || hasAnimated.current || value === undefined) return;
-    hasAnimated.current = true;
-    const obj = { val: 0 };
-    gsap.to(obj, {
-      val: value,
-      duration: 1.8,
-      ease: "power2.out",
-      onUpdate: () => {
-        ref.current.textContent = Math.floor(obj.val).toLocaleString();
-      },
-    });
-  }, [value]);
-
-  return <span ref={ref}>0</span>;
-}
+import { getUser } from "../lib/auth";
+import "./DashboardPage.css";
 
 /* ─── Skeleton Loader ──────────────────────────────────────── */
 function DashboardSkeleton() {
   return (
-    <div className="grid grid-3 gap-md" style={{ marginBottom: "20px" }}>
-      {[1,2,3].map((i) => (
-        <div key={i} className="glass-card-static p-lg">
-          <div className="skeleton skeleton-text" style={{ width: "40%" }} />
-          <div className="skeleton skeleton-title" style={{ width: "60%", marginTop: "12px" }} />
-        </div>
-      ))}
+    <div className="skeleton-wrapper" style={{ padding: "24px" }}>
+      <div className="grid grid-4 gap-md" style={{ marginBottom: "32px" }}>
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="dashboard-card" style={{ height: "120px" }}>
+            <div className="skeleton skeleton-text" style={{ width: "40%" }} />
+            <div className="skeleton skeleton-title" style={{ width: "60%", marginTop: "12px" }} />
+          </div>
+        ))}
+      </div>
+      <div className="dashboard-card" style={{ height: "300px" }}></div>
     </div>
   );
 }
 
-const statusColors = {
-  draft: "badge-info",
-  submitted: "badge-accent",
-  "under-review": "badge-warning",
-  "offer-received": "badge-teal",
-  "visa-processing": "badge-accent",
-  enrolled: "badge-success",
-  rejected: "badge-danger",
+/* ─── Status Badges ────────────────────────────────────────── */
+const StatusBadge = ({ status }) => {
+  const map = {
+    draft: { text: "Draft", class: "status-badge-gray" },
+    submitted: { text: "Submitted", class: "status-badge-blue" },
+    "under-review": { text: "Under Review", class: "status-badge-yellow" },
+    "offer-received": { text: "Offer Received", class: "status-badge-green" },
+    "visa-processing": { text: "Visa Processing", class: "status-badge-purple" },
+    enrolled: { text: "Enrolled", class: "status-badge-teal" },
+    rejected: { text: "Rejected", class: "status-badge-red" },
+  };
+  const badge = map[status] || map.draft;
+  return <span className={`status-badge ${badge.class}`}>{badge.text}</span>;
 };
 
-export default function DashboardPage() {
+/* ═══════════════════════════════════════════════════════════════
+   Student Dashboard
+   ═══════════════════════════════════════════════════════════════ */
+function StudentDashboard({ user }) {
+  const [data, setData] = useState({ applications: [], recommendations: [] });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    Promise.all([
+      api.applications().catch(() => ({ data: [] })),
+      api.recommendations("me").catch(() => ({ data: [] }))
+    ])
+      .then(([appsRes, recsRes]) => {
+        setData({
+          applications: appsRes.data || [],
+          recommendations: recsRes.data || []
+        });
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError("Failed to load dashboard data.");
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) return <DashboardSkeleton />;
+  if (error) return <div className="error-message">{error}</div>;
+
+  const { applications, recommendations } = data;
+
+  const totalApplications = applications.length;
+  const submitted = applications.filter((a) => a.status === "submitted").length;
+  const offersReceived = applications.filter((a) => a.status === "offer-received").length;
+  const enrolled = applications.filter((a) => a.status === "enrolled").length;
+
+  const topRecs = recommendations.slice(0, 3);
+
+  return (
+    <div className="student-dashboard">
+      <div className="dashboard-header">
+        <h1>Hello, {user?.fullName?.split(" ")[0] || "Student"}! 👋</h1>
+        <p className="text-secondary">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</p>
+      </div>
+
+      <div className="grid grid-4 gap-md stats-row">
+        <div className="dashboard-card stat-card">
+          <div className="stat-icon bg-blue-100 text-blue-600">📄</div>
+          <div className="stat-content">
+            <p>Total Applications</p>
+            <h3>{totalApplications}</h3>
+          </div>
+        </div>
+        <div className="dashboard-card stat-card">
+          <div className="stat-icon bg-yellow-100 text-yellow-600">📤</div>
+          <div className="stat-content">
+            <p>Submitted</p>
+            <h3>{submitted}</h3>
+          </div>
+        </div>
+        <div className="dashboard-card stat-card">
+          <div className="stat-icon bg-green-100 text-green-600">🎉</div>
+          <div className="stat-content">
+            <p>Offers Received</p>
+            <h3>{offersReceived}</h3>
+          </div>
+        </div>
+        <div className="dashboard-card stat-card">
+          <div className="stat-icon bg-teal-100 text-teal-600">🎓</div>
+          <div className="stat-content">
+            <p>Enrolled</p>
+            <h3>{enrolled}</h3>
+          </div>
+        </div>
+      </div>
+
+      <div className="dashboard-section">
+        <div className="section-header-flex">
+          <h2>Recommended Programs</h2>
+          <Link to="/dashboard/recommendations" className="text-link">View all</Link>
+        </div>
+        <div className="grid grid-3 gap-md recs-row">
+          {topRecs.length > 0 ? topRecs.map((rec) => (
+            <div key={rec._id} className="dashboard-card rec-card">
+              <div className="rec-card-header">
+                <div>
+                  <h4 className="uni-name">{rec.university?.name}</h4>
+                  <p className="uni-location">
+                    {rec.university?.country === "UK" ? "🇬🇧" : rec.university?.country === "Canada" ? "🇨🇦" : rec.university?.country === "Australia" ? "🇦🇺" : "🌍"} {rec.university?.country}
+                  </p>
+                </div>
+                <span className="match-score">{(rec.score * 100).toFixed(0)}% Match</span>
+              </div>
+              <div className="rec-card-body">
+                <h3 className="prog-title">{rec.program?.title}</h3>
+                <p className="prog-fee">${rec.program?.tuitionFeeUsd?.toLocaleString()} / yr</p>
+              </div>
+              <div className="rec-card-footer">
+                <Link to={`/dashboard/programs?search=${rec.program?.title}`} className="btn-outline-sm w-full text-center">View Program</Link>
+              </div>
+            </div>
+          )) : (
+            <div className="empty-state-small">
+              <p>Complete your profile to get personalized recommendations.</p>
+              <Link to="/dashboard/profile" className="btn-primary-sm mt-md">Complete Profile</Link>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="dashboard-section">
+        <div className="section-header-flex">
+          <h2>Recent Applications</h2>
+          <Link to="/dashboard/applications" className="text-link">View all</Link>
+        </div>
+        <div className="dashboard-card p-0">
+          {applications.length > 0 ? (
+            <div className="table-responsive">
+              <table className="clean-table">
+                <thead>
+                  <tr>
+                    <th>Program</th>
+                    <th>University</th>
+                    <th>Country</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {applications.slice(0, 5).map((app) => (
+                    <tr key={app._id}>
+                      <td className="font-medium">{app.program?.title}</td>
+                      <td>{app.university?.name}</td>
+                      <td>{app.destinationCountry}</td>
+                      <td><StatusBadge status={app.status} /></td>
+                      <td className="text-secondary">{new Date(app.createdAt).toLocaleDateString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="empty-state-small">
+              <p>You haven't started any applications yet.</p>
+              <Link to="/dashboard/programs" className="btn-primary-sm mt-md">Browse Programs</Link>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Admin Dashboard
+   ═══════════════════════════════════════════════════════════════ */
+function AdminDashboard() {
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
 
@@ -67,61 +202,91 @@ export default function DashboardPage() {
       .catch((err) => setError(err.message));
   }, []);
 
-  if (error) return <div className="glass-card-static p-lg"><p className="error-text">{error}</p></div>;
+  if (error) return <div className="error-message">{error}</div>;
   if (!data) return <DashboardSkeleton />;
 
-  const statCards = [
-    { label: "Total Students", value: data.totalStudents, icon: "👨‍🎓", color: "feature-icon-purple" },
-    { label: "Total Programs", value: data.totalPrograms, icon: "📋", color: "feature-icon-teal" },
-    { label: "Total Applications", value: data.totalApplications, icon: "📄", color: "feature-icon-orange" },
-  ];
-
   return (
-    <motion.div initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.1 } } }}>
-      {/* ─── Stat Cards ──────────────────────────────────────── */}
-      <div className="grid grid-3 gap-md" style={{ marginBottom: "24px" }}>
-        {statCards.map((card, i) => (
-          <motion.div key={card.label} className="glass-card p-lg" variants={fadeUp} custom={i}>
-            <div className="flex items-center justify-between" style={{ marginBottom: "16px" }}>
-              <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 500 }}>{card.label}</span>
-              <div className={`feature-icon ${card.color}`} style={{ width: "40px", height: "40px", fontSize: "1.2rem", marginBottom: 0 }}>
-                {card.icon}
-              </div>
-            </div>
-            <div style={{ fontSize: "2.2rem", fontFamily: "var(--font-heading)", fontWeight: 800 }}>
-              <AnimatedNumber value={card.value} />
-            </div>
-          </motion.div>
-        ))}
+    <div className="admin-dashboard">
+      <div className="dashboard-header">
+        <h1>Platform Overview</h1>
+      </div>
+      
+      <div className="grid grid-4 gap-md stats-row">
+        <div className="dashboard-card stat-card">
+          <div className="stat-icon bg-blue-100 text-blue-600">👨‍🎓</div>
+          <div className="stat-content">
+            <p>Total Students</p>
+            <h3>{data.totalStudents?.toLocaleString()}</h3>
+          </div>
+        </div>
+        <div className="dashboard-card stat-card">
+          <div className="stat-icon bg-teal-100 text-teal-600">🏛️</div>
+          <div className="stat-content">
+            <p>Total Programs</p>
+            <h3>{data.totalPrograms?.toLocaleString()}</h3>
+          </div>
+        </div>
+        <div className="dashboard-card stat-card">
+          <div className="stat-icon bg-orange-100 text-orange-600">📄</div>
+          <div className="stat-content">
+            <p>Total Applications</p>
+            <h3>{data.totalApplications?.toLocaleString()}</h3>
+          </div>
+        </div>
+        <div className="dashboard-card stat-card">
+          <div className="stat-icon bg-green-100 text-green-600">✅</div>
+          <div className="stat-content">
+            <p>Enrolled Students</p>
+            <h3>{data.statusBreakdown.find(s => s._id === 'enrolled')?.count || 0}</h3>
+          </div>
+        </div>
       </div>
 
-      {/* ─── Bottom Row ──────────────────────────────────────── */}
-      <div className="grid grid-2 gap-md">
-        {/* Top Countries */}
-        <motion.div className="glass-card-static p-lg" variants={fadeUp} custom={3}>
-          <h3 style={{ fontSize: "1rem", fontWeight: 700, marginBottom: "16px" }}>🌍 Top Destination Countries</h3>
-          <div className="flex flex-wrap gap-sm">
+      <div className="grid grid-2 gap-md mt-xl">
+        <div className="dashboard-card">
+          <h3 className="card-title">Top Destination Countries</h3>
+          <div className="flex flex-col gap-sm mt-md">
             {data.topCountries.map((item) => (
-              <span key={item._id} className="badge badge-teal" style={{ padding: "6px 14px", fontSize: "0.82rem" }}>
-                {item._id} — {item.count}
-              </span>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Status Breakdown */}
-        <motion.div className="glass-card-static p-lg" variants={fadeUp} custom={4}>
-          <h3 style={{ fontSize: "1rem", fontWeight: 700, marginBottom: "16px" }}>📊 Status Breakdown</h3>
-          <div className="flex flex-col gap-sm">
-            {data.statusBreakdown.map((item) => (
-              <div key={item._id} className="flex items-center justify-between" style={{ padding: "8px 0" }}>
-                <span className={`badge ${statusColors[item._id] || "badge-info"}`}>{item._id}</span>
-                <span style={{ fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: "1.1rem" }}>{item.count}</span>
+              <div key={item._id} className="progress-bar-row">
+                <div className="progress-label">
+                  <span>{item._id}</span>
+                  <span>{item.count}</span>
+                </div>
+                <div className="progress-track">
+                  <div className="progress-fill bg-blue-500" style={{ width: `${(item.count / data.totalApplications) * 100}%` }} />
+                </div>
               </div>
             ))}
           </div>
-        </motion.div>
+        </div>
+        
+        <div className="dashboard-card">
+          <h3 className="card-title">Application Statuses</h3>
+          <div className="flex flex-col gap-sm mt-md">
+            {data.statusBreakdown.map((item) => (
+              <div key={item._id} className="flex justify-between items-center py-2 border-b">
+                <StatusBadge status={item._id} />
+                <span className="font-bold">{item.count}</span>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
-    </motion.div>
+    </div>
   );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Main Component Router
+   ═══════════════════════════════════════════════════════════════ */
+export default function DashboardPage() {
+  const user = getUser();
+  
+  if (!user) return null;
+  
+  if (user.role === 'admin' || user.role === 'counselor') {
+    return <AdminDashboard />;
+  }
+  
+  return <StudentDashboard user={user} />;
 }

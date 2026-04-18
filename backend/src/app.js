@@ -6,6 +6,7 @@ const morgan = require("morgan");
 const applicationRoutes = require("./routes/applicationRoutes");
 const authRoutes = require("./routes/authRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
+const documentRoutes = require("./routes/documentRoutes");
 const healthRoutes = require("./routes/healthRoutes");
 const programRoutes = require("./routes/programRoutes");
 const recommendationRoutes = require("./routes/recommendationRoutes");
@@ -41,6 +42,7 @@ app.use("/api/programs", programRoutes);
 app.use("/api/recommendations", recommendationRoutes);
 app.use("/api/applications", applicationRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/documents", documentRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

@@ -17,13 +17,16 @@ afterAll(async () => {
   await mongoose.disconnect();
 });
 
+const runId = Math.random().toString(36).substring(7);
+const testEmail = `testuser-${runId}@test.com`;
+
 describe("Auth API", () => {
   let token;
 
   it("should register a new user", async () => {
     const res = await request(app).post("/api/auth/register").send({
       fullName: "Test User",
-      email: "testuser@test.com",
+      email: testEmail,
       password: "Test1234!",
     });
 
@@ -35,7 +38,7 @@ describe("Auth API", () => {
   it("should not register duplicate email", async () => {
     const res = await request(app).post("/api/auth/register").send({
       fullName: "Test User",
-      email: "testuser@test.com",
+      email: testEmail,
       password: "Test1234!",
     });
 
@@ -44,7 +47,7 @@ describe("Auth API", () => {
 
   it("should login with correct credentials", async () => {
     const res = await request(app).post("/api/auth/login").send({
-      email: "testuser@test.com",
+      email: testEmail,
       password: "Test1234!",
     });
 
@@ -55,7 +58,7 @@ describe("Auth API", () => {
 
   it("should reject login with wrong password", async () => {
     const res = await request(app).post("/api/auth/login").send({
-      email: "testuser@test.com",
+      email: testEmail,
       password: "wrongpassword",
     });
 
@@ -68,17 +71,15 @@ describe("Auth API", () => {
       .set("Authorization", `Bearer ${token}`);
 
     expect(res.statusCode).toBe(200);
-    expect(res.body.data.email).toBe("testuser@test.com");
+    expect(res.body.data.email).toBe(testEmail);
   });
 
-  it("should return dashboard overview for authenticated user", async () => {
+  it("should forbid dashboard overview for student user", async () => {
     const res = await request(app)
       .get("/api/dashboard/overview")
       .set("Authorization", `Bearer ${token}`);
 
-    expect(res.statusCode).toBe(200);
-    expect(res.body.success).toBe(true);
-    expect(res.body.data).toBeDefined();
+    expect(res.statusCode).toBe(403);
   });
 
   it("should return programs for authenticated user", async () => {

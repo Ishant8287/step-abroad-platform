@@ -63,60 +63,33 @@ function RevealSection({ children, className = "", id }) {
 const features = [
   {
     icon: "🎓",
-    iconClass: "feature-icon-purple",
     title: "Smart University Matching",
     desc: "AI-powered algorithm matches you with the best universities based on your profile, preferences, and academic goals.",
   },
   {
     icon: "🌎",
-    iconClass: "feature-icon-teal",
     title: "50+ Countries",
     desc: "Explore study programs across 50+ countries with detailed info on tuition, scholarships, and living costs.",
   },
   {
     icon: "📋",
-    iconClass: "feature-icon-orange",
     title: "Application Tracker",
     desc: "Track every application from draft to enrollment with real-time status updates and deadline reminders.",
   },
   {
     icon: "💡",
-    iconClass: "feature-icon-green",
     title: "Personalized Recommendations",
     desc: "Get tailored program suggestions based on your field of study, budget, and preferred destinations.",
   },
   {
     icon: "📊",
-    iconClass: "feature-icon-blue",
     title: "Analytics Dashboard",
     desc: "Beautiful dashboards showing your progress, application stats, and insights at a glance.",
   },
   {
     icon: "🛡️",
-    iconClass: "feature-icon-pink",
     title: "Visa & Document Support",
     desc: "Step-by-step guidance through visa processing and document requirements for your destination country.",
-  },
-];
-
-const testimonials = [
-  {
-    text: "StudyVerse made my dream of studying at the University of Toronto a reality. The AI recommendations were spot-on!",
-    name: "Priya Sharma",
-    role: "MS Computer Science, UofT",
-    initials: "PS",
-  },
-  {
-    text: "I applied to 5 universities and got into 3 — all thanks to the smart matching and application tracking features.",
-    name: "Ahmed Hassan",
-    role: "MBA, London Business School",
-    initials: "AH",
-  },
-  {
-    text: "The visa processing guidance saved me so much time and stress. I couldn't have done it without StudyVerse.",
-    name: "Maria Garcia",
-    role: "B.Eng, TU Munich",
-    initials: "MG",
   },
 ];
 
@@ -125,7 +98,6 @@ const testimonials = [
    ═══════════════════════════════════════════════════════════════ */
 export default function LandingPage() {
   const [scrolled, setScrolled] = useState(false);
-  const heroRef = useRef(null);
   const isLoggedIn = !!getToken();
 
   /* ── Scroll listener for nav ─────────────────────────────── */
@@ -135,59 +107,39 @@ export default function LandingPage() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  /* ── GSAP hero title animation ───────────────────────────── */
-  useEffect(() => {
-    if (!heroRef.current) return;
-    const tl = gsap.timeline();
-    tl.fromTo(
-      heroRef.current.querySelectorAll(".hero-word"),
-      { opacity: 0, y: 60, rotationX: -40 },
-      {
-        opacity: 1,
-        y: 0,
-        rotationX: 0,
-        duration: 0.9,
-        stagger: 0.08,
-        ease: "power3.out",
-      }
-    );
-  }, []);
-
   return (
     <div className="landing-page">
       {/* ═══ NAVBAR ═══ */}
       <nav className={`landing-nav ${scrolled ? "landing-nav-scrolled" : ""}`}>
         <Link to="/" className="landing-logo">
-          <span className="landing-logo-icon">✦</span>
-          StudyVerse
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#2563eb" />
+            <path d="M2 17L12 22L22 17" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M2 12L12 17L22 12" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          StepAbroad
         </Link>
 
         <div className="landing-nav-links">
+          <Link to="/universities">Universities</Link>
           <a href="#features">Features</a>
           <a href="#how-it-works">How It Works</a>
-          <a href="#testimonials">Testimonials</a>
         </div>
 
         <div className="landing-nav-actions">
           {isLoggedIn ? (
-            <Link to="/dashboard" className="btn btn-primary btn-sm">Dashboard →</Link>
+            <Link to="/dashboard" className="btn-primary" style={{ padding: '10px 20px', borderRadius: '8px', textDecoration: 'none' }}>Dashboard →</Link>
           ) : (
             <>
-              <Link to="/login" className="btn btn-ghost btn-sm">Log in</Link>
-              <Link to="/register" className="btn btn-primary btn-sm">Get Started</Link>
+              <Link to="/login" style={{ fontWeight: 600, color: '#4b5563', textDecoration: 'none', marginRight: '16px' }}>Log in</Link>
+              <Link to="/register" className="btn-primary" style={{ padding: '10px 20px', borderRadius: '8px', textDecoration: 'none' }}>Get Started</Link>
             </>
           )}
         </div>
       </nav>
 
       {/* ═══ HERO ═══ */}
-      <section className="hero" ref={heroRef}>
-        <div className="hero-bg">
-          <div className="hero-orb hero-orb-1" />
-          <div className="hero-orb hero-orb-2" />
-          <div className="hero-orb hero-orb-3" />
-        </div>
-
+      <section className="hero">
         <motion.div
           className="hero-content"
           initial="hidden"
@@ -199,27 +151,33 @@ export default function LandingPage() {
             Trusted by 10,000+ students worldwide
           </motion.div>
 
-          <h1 className="hero-title">
-            <span className="hero-word">Your </span>
-            <span className="hero-word gradient-text">Global Education </span>
-            <span className="hero-word">Journey </span>
-            <span className="hero-word">Starts </span>
-            <span className="hero-word">Here</span>
-          </h1>
+          <motion.h1 className="hero-title" variants={fadeUp}>
+            Your <span className="gradient-text">Global Education</span><br/>
+            Journey Starts Here
+          </motion.h1>
 
-          <motion.p className="hero-subtitle" variants={fadeUp} custom={3}>
+          <motion.p className="hero-subtitle" variants={fadeUp} custom={1}>
             Discover top universities, track applications, and get AI-powered
             recommendations — all in one beautifully crafted platform.
           </motion.p>
 
-          <motion.div className="hero-cta" variants={fadeUp} custom={4}>
-            <Link to={isLoggedIn ? "/dashboard" : "/register"} className="btn btn-primary">
+          <motion.div className="hero-cta" variants={fadeUp} custom={2}>
+            <Link to={isLoggedIn ? "/dashboard" : "/register"} className="btn-primary">
               Start Exploring →
             </Link>
-            <a href="#features" className="btn btn-secondary">
+            <a href="#how-it-works" className="btn-secondary">
               See How It Works
             </a>
           </motion.div>
+        </motion.div>
+
+        <motion.div 
+          className="hero-image-wrapper"
+          initial={{ opacity: 0, x: 40 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
+        >
+          <img src="/assets/landing_illustration.png" alt="Study Abroad Global Journey" />
         </motion.div>
       </section>
 
@@ -232,7 +190,7 @@ export default function LandingPage() {
           { target: 95, suffix: "%", label: "Success Rate" },
         ].map((s, i) => (
           <motion.div key={s.label} className="stat-item" variants={fadeUp} custom={i}>
-            <div className="stat-number gradient-text">
+            <div className="stat-number">
               <AnimatedCounter target={s.target} suffix={s.suffix} />
             </div>
             <div className="stat-label">{s.label}</div>
@@ -243,8 +201,8 @@ export default function LandingPage() {
       {/* ═══ FEATURES ═══ */}
       <RevealSection className="section" id="features">
         <motion.div variants={fadeUp}>
-          <span className="section-label">✦ Why StudyVerse</span>
-          <h2 className="section-title">Everything you need to<br /><span className="gradient-text">study abroad, simplified.</span></h2>
+          <span className="section-label">Why StepAbroad</span>
+          <h2 className="section-title">Everything you need to<br />study abroad, simplified.</h2>
           <p className="section-subtitle">
             From university discovery to visa processing — we've built the
             tools that make studying abroad effortless.
@@ -258,9 +216,8 @@ export default function LandingPage() {
               className="feature-card"
               variants={fadeUp}
               custom={i}
-              whileHover={{ y: -6 }}
             >
-              <div className={`feature-icon ${f.iconClass}`}>{f.icon}</div>
+              <div className="feature-icon">{f.icon}</div>
               <h3>{f.title}</h3>
               <p>{f.desc}</p>
             </motion.div>
@@ -271,11 +228,8 @@ export default function LandingPage() {
       {/* ═══ HOW IT WORKS ═══ */}
       <RevealSection className="section" id="how-it-works">
         <motion.div variants={fadeUp}>
-          <span className="section-label">✦ How It Works</span>
-          <h2 className="section-title">Three steps to your<br /><span className="gradient-text">dream university.</span></h2>
-          <p className="section-subtitle">
-            We've streamlined the entire study abroad process into three simple steps.
-          </p>
+          <span className="section-label">How It Works</span>
+          <h2 className="section-title">Three steps to your<br />dream university.</h2>
         </motion.div>
 
         <div className="steps-container">
@@ -293,42 +247,9 @@ export default function LandingPage() {
         </div>
       </RevealSection>
 
-      {/* ═══ TESTIMONIALS ═══ */}
-      <RevealSection className="section" id="testimonials">
-        <motion.div variants={fadeUp}>
-          <span className="section-label">✦ Testimonials</span>
-          <h2 className="section-title">Loved by students<br /><span className="gradient-text">around the world.</span></h2>
-          <p className="section-subtitle">
-            Hear from students who transformed their study abroad journey with StudyVerse.
-          </p>
-        </motion.div>
-
-        <div className="testimonials-grid">
-          {testimonials.map((t, i) => (
-            <motion.div
-              key={t.name}
-              className="testimonial-card"
-              variants={fadeUp}
-              custom={i}
-            >
-              <div className="testimonial-stars">★★★★★</div>
-              <p className="testimonial-text">"{t.text}"</p>
-              <div className="testimonial-author">
-                <div className="testimonial-avatar">{t.initials}</div>
-                <div>
-                  <div className="testimonial-name">{t.name}</div>
-                  <div className="testimonial-role">{t.role}</div>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </RevealSection>
-
       {/* ═══ CTA ═══ */}
       <section className="section">
         <div className="cta-section">
-          <div className="cta-bg" />
           <div className="cta-content">
             <motion.h2
               initial={{ opacity: 0, y: 30 }}
@@ -336,7 +257,7 @@ export default function LandingPage() {
               viewport={{ once: true }}
               transition={{ duration: 0.7 }}
             >
-              Ready to start your <span className="gradient-text">global journey?</span>
+              Ready to start your global journey?
             </motion.h2>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
@@ -353,7 +274,7 @@ export default function LandingPage() {
               viewport={{ once: true }}
               transition={{ duration: 0.7, delay: 0.3 }}
             >
-              <Link to="/register" className="btn btn-primary" style={{ padding: "16px 40px", fontSize: "1rem", borderRadius: "28px" }}>
+              <Link to="/register" className="btn-primary">
                 Create Free Account →
               </Link>
             </motion.div>
@@ -365,20 +286,24 @@ export default function LandingPage() {
       <footer className="landing-footer">
         <div className="footer-grid">
           <div>
-            <div className="landing-logo" style={{ marginBottom: "4px" }}>
-              <span className="landing-logo-icon">✦</span>
-              StudyVerse
+            <div className="landing-logo" style={{ marginBottom: "16px" }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#2563eb" />
+                <path d="M2 17L12 22L22 17" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M2 12L12 17L22 12" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              StepAbroad
             </div>
             <p className="footer-brand-desc">
-              Your AI-powered companion for studying abroad. Discover, apply,
+              Your intelligent companion for studying abroad. Discover, apply,
               and succeed — all in one place.
             </p>
           </div>
           <div className="footer-col">
             <h4>Platform</h4>
+            <Link to="/universities">Universities</Link>
             <a href="#features">Features</a>
             <a href="#how-it-works">How It Works</a>
-            <a href="#testimonials">Reviews</a>
           </div>
           <div className="footer-col">
             <h4>Resources</h4>
@@ -394,11 +319,10 @@ export default function LandingPage() {
           </div>
         </div>
         <div className="footer-bottom">
-          <span>© 2026 StudyVerse. All rights reserved.</span>
-          <div className="footer-socials">
-            <a href="#" aria-label="Twitter">𝕏</a>
-            <a href="#" aria-label="LinkedIn">in</a>
-            <a href="#" aria-label="GitHub">⌂</a>
+          <span>© 2026 StepAbroad. All rights reserved.</span>
+          <div style={{ display: 'flex', gap: '16px' }}>
+            <a href="#">Twitter</a>
+            <a href="#">LinkedIn</a>
           </div>
         </div>
       </footer>

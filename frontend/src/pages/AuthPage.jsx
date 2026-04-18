@@ -1,18 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
 import { api } from "../lib/api";
 import { setSession } from "../lib/auth";
 import "./AuthPage.css";
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 25 },
-  visible: (i = 0) => ({
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, delay: i * 0.07, ease: [0.25, 0.46, 0.45, 0.94] },
-  }),
-};
 
 export default function AuthPage({ mode }) {
   const navigate = useNavigate();
@@ -46,186 +36,149 @@ export default function AuthPage({ mode }) {
     }
   };
 
-  return (
-    <div className="auth-page">
-      {/* ═══ LEFT — BRANDING ═══ */}
-      <div className="auth-left">
-        <div className="auth-left-bg">
-          <div className="auth-orb auth-orb-1" />
-          <div className="auth-orb auth-orb-2" />
-        </div>
-        <motion.div
-          className="auth-left-content"
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.7, ease: "easeOut" }}
-        >
-          <div className="auth-brand-logo">
-            <span className="auth-brand-icon">✦</span>
-            StudyVerse
-          </div>
-          <h1 className="auth-left-title">
-            {isRegister
-              ? <>Start your <span className="gradient-text">global education</span> journey</>
-              : <>Welcome back to <span className="gradient-text">StudyVerse</span></>}
-          </h1>
-          <p className="auth-left-subtitle">
-            {isRegister
-              ? "Join thousands of students who found their dream university through our AI-powered platform."
-              : "Track your applications, discover new programs, and get personalized recommendations."}
-          </p>
-
-          <div className="auth-left-features">
-            {[
-              "AI-powered university matching",
-              "Application tracking & status updates",
-              "Personalized program recommendations",
-            ].map((feature) => (
-              <div key={feature} className="auth-feature-item">
-                <span className="auth-feature-check">✓</span>
-                {feature}
-              </div>
-            ))}
-          </div>
-        </motion.div>
+  const renderFormFields = () => (
+    <>
+      <div className="auth-brand">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#2563eb" />
+          <path d="M2 17L12 22L22 17" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M2 12L12 17L22 12" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        StepAbroad
+      </div>
+      <div className="auth-header">
+        <h1>{isRegister ? "Create Account" : "Welcome Back"}</h1>
+        <p>
+          {isRegister
+            ? "Join us to find your dream university."
+            : "Sign in to access your dashboard."}
+        </p>
       </div>
 
-      {/* ═══ RIGHT — FORM ═══ */}
-      <div className="auth-right">
-        <motion.div
-          className="auth-form-wrapper"
-          initial="hidden"
-          animate="visible"
-          variants={{ visible: { transition: { staggerChildren: 0.07 } } }}
-        >
-          <motion.div className="auth-form-header" variants={fadeUp}>
-            <h2>{isRegister ? "Create your account" : "Sign in"}</h2>
-            <p>
-              {isRegister
-                ? "Fill in your details to get started"
-                : "Enter your credentials to access your dashboard"}
-            </p>
-          </motion.div>
+      {error && <div className="auth-error">{error}</div>}
 
-          {/* Social buttons */}
-          <motion.div className="auth-social-btns" variants={fadeUp} custom={1}>
-            <button type="button" className="auth-social-btn">
-              <span className="auth-social-icon">G</span>
-              Google
-            </button>
-            <button type="button" className="auth-social-btn">
-              <span className="auth-social-icon">⌂</span>
-              GitHub
-            </button>
-          </motion.div>
+      <form className="auth-form" onSubmit={submit}>
+        {isRegister && (
+          <div className="auth-form-group">
+            <label htmlFor="auth-fullname">Full Name</label>
+            <input
+              id="auth-fullname"
+              className="auth-input"
+              placeholder="Jane Doe"
+              required
+              value={form.fullName}
+              onChange={(e) => setForm({ ...form, fullName: e.target.value })}
+            />
+          </div>
+        )}
 
-          <motion.div className="auth-divider" variants={fadeUp} custom={2}>
-            or continue with email
-          </motion.div>
+        <div className="auth-form-group">
+          <label htmlFor="auth-email">Email Address</label>
+          <input
+            id="auth-email"
+            className="auth-input"
+            type="email"
+            placeholder="you@example.com"
+            required
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+          />
+        </div>
 
-          <form className="auth-form" onSubmit={submit}>
-            {isRegister && (
-              <motion.div className="form-field" variants={fadeUp} custom={3}>
-                <label htmlFor="auth-fullname">Full Name</label>
-                <input
-                  id="auth-fullname"
-                  className="input"
-                  placeholder="John Doe"
-                  required
-                  value={form.fullName}
-                  onChange={(e) => setForm({ ...form, fullName: e.target.value })}
-                />
-              </motion.div>
-            )}
+        <div className="auth-form-group">
+          <label htmlFor="auth-password">Password</label>
+          <input
+            id="auth-password"
+            className="auth-input"
+            type={showPassword ? "text" : "password"}
+            placeholder="Minimum 8 characters"
+            required
+            minLength={8}
+            value={form.password}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
+            style={{ paddingRight: "40px" }}
+          />
+          <button
+            type="button"
+            className="password-toggle"
+            onClick={() => setShowPassword(!showPassword)}
+            tabIndex={-1}
+          >
+            {showPassword ? "🙈" : "👁"}
+          </button>
+        </div>
 
-            <motion.div className="form-field" variants={fadeUp} custom={isRegister ? 4 : 3}>
-              <label htmlFor="auth-email">Email address</label>
-              <input
-                id="auth-email"
-                className="input"
-                type="email"
-                placeholder="you@example.com"
-                required
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-              />
-            </motion.div>
-
-            <motion.div className="form-field" variants={fadeUp} custom={isRegister ? 5 : 4}>
-              <label htmlFor="auth-password">Password</label>
-              <div className="password-wrapper">
-                <input
-                  id="auth-password"
-                  className="input"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Minimum 8 characters"
-                  required
-                  minLength={8}
-                  value={form.password}
-                  onChange={(e) => setForm({ ...form, password: e.target.value })}
-                  style={{ paddingRight: "48px" }}
-                />
-                <button
-                  type="button"
-                  className="password-toggle"
-                  onClick={() => setShowPassword(!showPassword)}
-                  tabIndex={-1}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  {showPassword ? "🙈" : "👁"}
-                </button>
-              </div>
-            </motion.div>
-
-            {isRegister && (
-              <motion.div className="form-field" variants={fadeUp} custom={6}>
-                <label htmlFor="auth-role">I am a</label>
-                <select
-                  id="auth-role"
-                  className="input select"
-                  value={form.role}
-                  onChange={(e) => setForm({ ...form, role: e.target.value })}
-                >
-                  <option value="student">Student</option>
-                  <option value="counselor">Counselor</option>
-                </select>
-              </motion.div>
-            )}
-
-            {error && (
-              <motion.div
-                className="auth-error"
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
+        {isRegister && (
+          <div className="auth-form-group">
+            <label>I am a</label>
+            <div className="role-selector">
+              <button
+                type="button"
+                className={`role-btn ${form.role === "student" ? "active" : ""}`}
+                onClick={() => setForm({ ...form, role: "student" })}
               >
-                {error}
-              </motion.div>
-            )}
-
-            <motion.div className="auth-submit" variants={fadeUp} custom={isRegister ? 7 : 5}>
-              <button className="btn btn-primary" disabled={loading} type="submit">
-                {loading ? (
-                  <>
-                    <span className="spinner" />
-                    Please wait...
-                  </>
-                ) : isRegister ? (
-                  "Create Account →"
-                ) : (
-                  "Sign In →"
-                )}
+                Student
               </button>
-            </motion.div>
-          </form>
+              <button
+                type="button"
+                className={`role-btn ${form.role === "counselor" ? "active" : ""}`}
+                onClick={() => setForm({ ...form, role: "counselor" })}
+              >
+                Counselor
+              </button>
+            </div>
+          </div>
+        )}
 
-          <motion.p className="auth-footer-text" variants={fadeUp} custom={isRegister ? 8 : 6}>
-            {isRegister ? (
-              <>Already have an account? <Link to="/login">Sign in</Link></>
-            ) : (
-              <>Don't have an account? <Link to="/register">Create one</Link></>
-            )}
-          </motion.p>
-        </motion.div>
+        <button className="auth-btn" disabled={loading} type="submit">
+          {loading ? "Please wait..." : isRegister ? "Create Account" : "Login"}
+        </button>
+
+        {!isRegister && (
+          <div style={{ textAlign: "center", marginTop: "1rem" }}>
+            <a href="#" style={{ color: "#2563eb", fontSize: "0.875rem", textDecoration: "none" }}>
+              Forgot password?
+            </a>
+          </div>
+        )}
+      </form>
+
+      <div className="auth-links">
+        {isRegister ? (
+          <>Already have an account? <Link to="/login">Login</Link></>
+        ) : (
+          <>Don't have an account? <Link to="/register">Register</Link></>
+        )}
+      </div>
+    </>
+  );
+
+  if (isRegister) {
+    return (
+      <div className="auth-wrapper register-mode">
+        <div className="register-left">
+          <h2>Your Global Education<br/>Journey Starts Here</h2>
+          <img src="/assets/register_illustration.png" alt="University Campus" />
+        </div>
+        <div className="register-right">
+          <div style={{ maxWidth: "480px", width: "100%", margin: "0 auto" }}>
+            {renderFormFields()}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Login Mode
+  return (
+    <div className="auth-wrapper login-mode">
+      <div className="login-card">
+        <div className="login-left">
+          <img src="/assets/login_illustration.png" alt="Globe and Travel" />
+        </div>
+        <div className="login-right">
+          {renderFormFields()}
+        </div>
       </div>
     </div>
   );
