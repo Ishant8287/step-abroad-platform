@@ -45,6 +45,12 @@ app.use("/api/recommendations", recommendationRoutes);
 app.use("/api/applications", applicationRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/documents", documentRoutes);
+app.get("/", (req, res) => {
+  res.json({
+    status: "success",
+    message: "StepAbroad API is running",
+  });
+});
 
 app.use(notFound);
 app.use(errorHandler);
